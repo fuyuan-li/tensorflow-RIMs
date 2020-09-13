@@ -120,7 +120,7 @@ class RIMCell(tf.keras.layers.Layer):
         
         h_update = h_comm*mask + h_old*(1-mask)
         c_update = c_rnnout*mask + c_old*(1-mask)
-        return tf.reshape(h_update, [tf.shape(inputs)[0], -1]), (h_update, c_update)
+        return tf.reshape(h_update, [tf.shape(inputs)[0], self.units*self.nRIM]), (h_update, c_update)
     
     def input_attention_mask(self, x, hs, training=False):
         # x of shape (batch_size, input_feature_size)
