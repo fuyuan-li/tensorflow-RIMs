@@ -149,6 +149,7 @@ class RIMCell(tf.keras.layers.Layer):
         sparse_tensor = tf.sparse.SparseTensor(indices=tf.cast(full_indices, tf.int64),
                                               values=tf.ones(tf.shape(full_indices)[0]),
                                               dense_shape=[tf.shape(x)[0],self.nRIM])
+        sparse_tensor = tf.sparse.reorder(sparse_tensor)
         mask_ = tf.sparse.to_dense(sparse_tensor)
         mask  = tf.expand_dims(mask_, axis=-1)
         
