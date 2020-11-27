@@ -43,7 +43,7 @@ class GroupGRUCell(tf.keras.layers.Layer):
     def call(self, inputs, states):
         # inputs in shape [batch, nRIM, din]
         # h, hidden_state in shape [batch, nRIM, units]
-        h = states
+        h, = states
         preact_i = tf.transpose(tf.matmul(tf.transpose(inputs, [1,0,2]), self.i2h_param), [1,0,2])
         preact_h = tf.transpose(tf.matmul(tf.transpose(h,      [1,0,2]), self.h2h_param), [1,0,2])
         
