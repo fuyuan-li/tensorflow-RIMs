@@ -56,7 +56,7 @@ class GroupGRUCell(tf.keras.layers.Layer):
         
         h_t = tf.multiply(h, input_gate) + tf.multiply(new_cell, 1-input_gate)
         
-        return h_t, h_t
+        return h_t, (h_t)
         
 class GroupLSTMCell(tf.keras.layers.Layer):
     
