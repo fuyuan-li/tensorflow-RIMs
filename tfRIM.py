@@ -19,7 +19,45 @@ class GroupLinearLayer(tf.keras.layers.Layer):
         out = tf.transpose(tf.matmul(tf.transpose(inputs, [1,0,2]), params),[1,0,2])
         return out
 
+class GroupGRUCell(tf.keras.layers.Layer):
+    
+    def __init__(self, units, nRIM):
+        super(GroupGRUCell, self).__init__()
+        self.units = units
+        self.nRIM = nRIM
+        
+    @property
+    def state_size(self):
+        return tf.TensorShape([self.nRIM, self.units])
+    
+    def build(self, input_shape):
+        self.i2h_param = self.add_weight(name = 'group_gru_i2h',
+                                        shape = (self.nRIM, int(input_shape[-1]), self.units*3),
+                                        initializer = 'uniform',
+                                        trainable = True)
+        self.h2h_param = self.add_weight(name = 'group_gru_h2h',
+                                        shape = (self.nRIM, self.units, self.units*3),
+                                        initializer = 'uniform',
+                                        trainable = True)
 
+    def call(self, inputs, states):
+        # inputs in shape [batch, nRIM, din]
+        # h, hidden_state in shape [batch, nRIM, units]
+        h = states
+        preact_i = tf.transpose(tf.matmul(tf.transpose(inputs, [1,0,2]), self.i2h_param), [1,0,2])
+        preact_h = tf.transpose(tf.matmul(tf.transpose(h,      [1,0,2]), self.h2h_param), [1,0,2])
+        
+        i_reset, i_input, i_new = tf.split(preact_i, 3, -1)
+        h_reset, h_input, h_new = tf.split(preact_i, 3, -1)
+        
+        reset_gate = tf.sigmoid(i_reset + h_reset)
+        input_gate = tf.sigmoid(i_input + h_input)
+        new_cell = tf.tanh(i_new + tf.multiply(reset_gate, h_new))
+        
+        h_t = tf.multiply(h, input_gate) + tf.multiply(new_cell, 1-input_gate)
+        
+        return h_t, h_t
+        
 class GroupLSTMCell(tf.keras.layers.Layer):
     
     def __init__(self, units, nRIM):
